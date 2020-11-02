@@ -1,0 +1,7 @@
+matplotlib==3.0.3
+networkx==2.2
+numpy==1.16.2
+pandas==0.24.2
+PyQt5==5.12.2
+PyQt5-sip==4.19.17
+pyqtdeploy==2.4
