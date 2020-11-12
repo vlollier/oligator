@@ -1110,7 +1110,7 @@ class OseDetail(QDialog):
         
     def startChange(self):
         """
-        """
+        """        
         cycend=self.startCmbBox.currentData()+self.formCombobox.currentData()-1
         if cycend<=len(self.combos):
             self.display_cycleline()    
@@ -1153,8 +1153,8 @@ class OseDetail(QDialog):
                 self.gridlayout.addWidget(self.nameLabel,row , posistart[1], 1, 2)
                 self.gridlayout.addWidget(self.buttonBox,row , posistart[1]+2, 1, 2)
     
-            
-                
+                if self.typeComboBox.currentData()==self.formCombobox.currentData():
+                    self.startCmbBox.setCurrentText("1")
                 self.display_cycleline()
                 self.enable_anhydro()
             
@@ -1172,9 +1172,11 @@ class OseDetail(QDialog):
         if curform==4:                      
             if self.typeComboBox.currentData()>=5:
                 icarb=self.startCmbBox.currentData()+3
-                
-                ok=(icarb in self.obond) or self.combos[icarb][2].currentData()!=SubstitutionLibrary.NOSUBID
-                self.formCombobox.setDisabled(ok)                
+                try:
+                    ok=(icarb in self.obond) or self.combos[icarb][2].currentData()!=SubstitutionLibrary.NOSUBID
+                    self.formCombobox.setDisabled(ok)                
+                except IndexError:
+                    print((len(self.combos),icarb))
             else:                               
                 self.formCombobox.setDisabled(False)
         elif curform==5:

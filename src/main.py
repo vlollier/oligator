@@ -14,6 +14,7 @@ from GlycanQt5 import *
 from MassSpectrometry import Spectrum
 from Conversion import *
 from GlycanTopology import SingletonTopo,OseModel
+
 import utils
 
 class Window( QMainWindow ):
@@ -326,14 +327,31 @@ class Window( QMainWindow ):
                 for line in f:
                     notation+=line.strip()
                 f.close()
-        if notation!="":            
-            decoder=WurcsDecoder(notation)
-    
-            if decoder!=None:
-    
-                self.maincontroller.loadmodel(decoder.Gatom,decoder.Gose)
-                self.maincontroller.display_topo()
-                
+        if notation=="":            
+            errdial=QMessageBox()
+            errdial.setIcon(QMessageBox.Critical)
+            errdial.setText("empty notation")
+            errdial.setWindowTitle("format error")
+            errdial.setDetailedText(check)                    
+            errdial.exec_()                
+        else:            
+            if re.match("^WURCS=2.0.*$",notation):
+                try:
+                    decoder=WurcsDecoder(notation)  
+                    if decoder==None:
+                        Logger.debug("empty graph error ",2)                          
+                    else:
+                        self.maincontroller.loadmodel(decoder.Gatom,decoder.Gose)
+                        self.maincontroller.display_topo()                                          
+                except :
+                    Logger.debug("empty graph error ",2)                    
+            else:
+                errdial=QMessageBox()
+                errdial.setIcon(QMessageBox.Critical)
+                errdial.setText("not a WURCS notation")
+                errdial.setWindowTitle("format error")                
+                errdial.exec_()                 
+            
     def importSmiles(self):
         """
         """
@@ -349,17 +367,28 @@ class Window( QMainWindow ):
                 f.close()
         
             if SmilesDecoder.check_smiles(notation):
-                decoder=SmilesDecoder(notation)                
-                
-                
-                if decoder!=None:                    
-                
-                    Logger.debug("nb oses from smiles:"+str(len(decoder.Gose.nodes())),0) 
-                    
-                    self.maincontroller.loadmodel(decoder.Gatom,decoder.Gose)
-                    self.maincontroller.display_topo()
-                
-           
+                try:
+                    decoder=SmilesDecoder(notation)                     
+                    if decoder==None:                    
+                        Logger.debug("empty graph error ",2)    
+                    else:
+                        Logger.debug("nb oses from smiles:"+str(len(decoder.Gose.nodes())),0) 
+                        
+                        self.maincontroller.loadmodel(decoder.Gatom,decoder.Gose)
+                        self.maincontroller.display_topo()
+                except:
+                    Logger.debug("empty graph error ",2)  
+                    errdial=QMessageBox()
+                    errdial.setIcon(QMessageBox.Critical)
+                    errdial.setText("error on notation")
+                    errdial.setWindowTitle("SMILES format error")                
+                    errdial.exec_()                     
+            else:
+                errdial=QMessageBox()
+                errdial.setIcon(QMessageBox.Critical)
+                errdial.setText("not a SMILES notation")
+                errdial.setWindowTitle("format error")                
+                errdial.exec_()               
             
     def exportSMILES(self):
         """
@@ -433,6 +462,7 @@ class Window( QMainWindow ):
                 lines=[]
                 lines.append("#SMILES:%s"%smi)
                 lines.append("#ION:%s"%self.adduct)
+                
                 for ion in ions:
                     lines.append(ion.replace(s.getseparator(),"\t"))
                 self.__write_lines__(lines,fileName[0])

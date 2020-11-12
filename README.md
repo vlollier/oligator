@@ -27,7 +27,7 @@ startwin.cmd
 
 
 ## Help to start
-An user manual is available as user_manual.pdf file. Some notations in WURCS and SMILES formats are given in the test directory as examples of structure.
+An user manual is available as user_manual.pdf file. Some notations in WURCS and SMILES formats are given in the sample directory as examples of structure.
 
 
 

@@ -14,7 +14,7 @@ import random
 import platform
 import networkx as nx
 import matplotlib.pyplot as plt
-#from .Graphes import *
+
 from utils import Logger,Atom
 
 def plotGose(G,ax=None):
@@ -70,10 +70,26 @@ class Spectrum:
         fragment.fraglink(self.ions)
         fragment.fragzero(self.ions)
         self.add_rdm_intensity("A")
-        
+        self.ions=self.quick_sort_ions(self.ions)
         Logger.debug("neutral mass of entire molecule %.2f"%fragment.precurmass())
         nx.draw(glabels)
+    
+         
+     
+    def quick_sort_ions(self,arr):
+        """ Quicksort a list of ions
         
+        :type arr: list of ions (each is a dictionary)
+        :param arr: List to sort
+        :returns: list -- Sorted list
+        """
+        if not arr:
+            return []
+    
+        return self.quick_sort_ions([x for x in arr if x["mz"] < arr[0]["mz"]]) \
+            + [x for x in arr if x["mz"] == arr[0]["mz"]] \
+            + self.quick_sort_ions([x for x in arr if x["mz"] > arr[0]["mz"]])       
+                
     @staticmethod
     def __adduct__(add,dctions):
         ions=[]
