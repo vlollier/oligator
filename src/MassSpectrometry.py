@@ -45,15 +45,14 @@ def plotGose(G,ax=None):
 
 class Spectrum:
     ## from Domon & Costello
-    positive={"B":0,"C":2,"X":[1],"Y":2,"Z":0}
-    negative={"B":-2,"C":0,"A":[-1],"X":[-1],"Y":0,"Z":-2}    
+    cid={"A":1,"X":1,"B":-1,"C":1,"Y":1,"Z":-1}     
     default={"B":0,"C":0,"A":0,"X":0,"Y":0,"Z":0}    
     
     def __init__(self,Gatom,Gose,start,dicoMass=None):
         glabels=Gose.copy()
         self.gmass=Gatom.copy()
         
-        self.randomint={"[A,X]":[3000.0, 10000.0],"[B,C,Y,Z]":[10.0, 4000.0]}
+        self.randomint={"[A,X]":[3000.0, 10000.0],"[B,C,Y,Z]":[10.0, 4000.0]}        
         
         
         if dicoMass!=None:
@@ -69,11 +68,12 @@ class Spectrum:
         fragment.fragose(self.ions)
         fragment.fraglink(self.ions)
         fragment.fragzero(self.ions)
-        self.add_rdm_intensity("A")
+        #self.add_rdm_intensity("A")
         self.ions=self.quick_sort_ions(self.ions)
-        Logger.debug("neutral mass of entire molecule %.2f"%fragment.precurmass())
+        #Logger.debug("neutral mass of entire molecule %.2f"%fragment.precurmass())
+        print("neutral mass of entire molecule %.2f"%fragment.precurmass())
         nx.draw(glabels)
-    
+        
          
      
     def quick_sort_ions(self,arr):
@@ -175,7 +175,7 @@ class Spectrum:
                 if re.search(regexpion,ion["name"])!=None:
                     intensite=random.uniform(minmax[0], minmax[1]) 
             if intensite>0:
-                lsions.append("%0.3f;%0.3f;%s"%(ion["mz"],intensite,ion["name"]))
+                lsions.append("%0.6f;%0.3f;%s"%(ion["mz"],intensite,ion["name"]))
                 
         return lsions
     
@@ -196,7 +196,7 @@ class Spectrum:
                        
                         
             if intensite>0:  
-                lsions.append("%0.3f;%0.3f;%s"%(ion["mz"],intensite,ion["name"]))            
+                lsions.append("%0.6f;%0.3f;%s"%(ion["mz"],intensite,ion["name"]))            
 
 
         return lsions
@@ -605,8 +605,10 @@ class Mass:
                 xion="X_{"+re+branch+"}"
                 aion="A_{"+nre+branch+"}"
                 
-               
-                
+                carbcycl=[]
+                for c in self.cyclatoms[o]:
+                    if self.Gatom.nodes[c]['cnum']!=0:
+                        carbcycl.append(self.Gatom.nodes[c]['cnum'])
                 # trouver le C du cycle le + pres de l'extremite reductrice (startc)
                 startc=min(self.cyclatoms[o])  # pour eviter une valeur nulle
                 if o!=self.r:
@@ -623,9 +625,8 @@ class Mass:
                         if self.Gatom.nodes[i]['cnum']==1:
                             startc=i
                             break
-                
-                
-                
+               
+                                
                 # calculer la masse des ions X et A (les ions X contiennent le startc)
                 for casse in edges:                    
                     morceaux=self.partitionne(casse)   
@@ -639,19 +640,23 @@ class Mass:
                         
                     
                     lblion=""
-                    edge=casse[0]                    
+                    edge=casse[0]  
                     edge=[self.Gatom.nodes[edge[0]]['cnum'],self.Gatom.nodes[edge[1]]['cnum']]
                     edge.sort()
-                    ncc=len(self.cyclatoms[o])-1
-                    if edge!=[0,ncc]:                        
+                    #ncc=len(self.cyclatoms[o])-1  
+                    ncc=max(carbcycl)
+                    startc=min(carbcycl)
+                    if edge!=[0,ncc]:                                                
                         lab0=min(edge[0]-startc,edge[1]-startc)+startc                  
                     else:                        
                         lab0=ncc
                     
-                    edge=casse[1]                                                 
+                    edge=casse[1]                      
                     edge=[self.Gatom.nodes[edge[0]]['cnum'],self.Gatom.nodes[edge[1]]['cnum']]
                     edge.sort()    
-                    if edge!=[0,ncc]:
+                    
+                    
+                    if edge!=[0,ncc]:                        
                         lab1=min(edge[0]-startc,edge[1]-startc)+startc 
                     else:
                         lab1=ncc
@@ -717,7 +722,7 @@ class Mass:
                 edge2=(path[p[1]],path[p[1]+1])
         
             edges.append([edge1,edge2])
-    
+        
         return edges
                             
     def get_oseatoms_degree(self,iose,fromc,toc):

@@ -119,6 +119,8 @@ class Window( QMainWindow ):
         
         exit.addAction(exitButton)
         self.reset_msms_options()
+        self.dicoH=Spectrum.cid
+        self.adduct="+H"
         
     def reset_msms_options(self):
         self.RatioIon={}

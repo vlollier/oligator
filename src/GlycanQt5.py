@@ -1297,12 +1297,20 @@ class OseDetail(QDialog):
             self.combos[self.CANHY[0]-1][2].setEnabled(True)
             if len(self.combos)==self.CANHY[1]:
                 self.combos[self.CANHY[1]-1][2].setEnabled(True)  
-        
+
+## next release preparation
+#class DialogPeakList(QDialog):        
+    #def __init__(self,name=None,number=None,precision=None):
+        #super(DialogPeakList, self).__init__()
+        #self.name=name
+        #self.number=number
+        #self.precision=precision
+        #self.peaklist=()
         
 class DialogMS(QDialog):  
     default_ion="+H"
     
-    def __init__(self,random,ratio,dicoH=None):
+    def __init__(self,random,ratio,dicoH=None,peaklist=None):
         """
         build Qt window from ressource file "SpectrometryIntensity_ion.ui"
         """
