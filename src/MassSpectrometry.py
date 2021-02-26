@@ -2,7 +2,7 @@
 
 
 __author__ ="Virginie Lollier"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __license__ = "BSD"
 
 
@@ -19,12 +19,12 @@ from utils import Logger,Atom
 
 def plotGose(G,ax=None):
     """
-    """        
+    """
     coloromap={'pentose':'salmon','hexose':'lightblue'}
     colorose=[]
     for io in G.nodes():
         nct=G.nodes[io]['nbc']
-        
+
         if nct in coloromap.keys():
             colorose.append(coloromap[nct])
         else:
@@ -34,27 +34,27 @@ def plotGose(G,ax=None):
     nx.draw(G,pos,ax=ax)
     nx.draw_networkx_nodes(G,pos,node_color=colorose)
     nx.draw_networkx_labels(G,pos,font_size=14)
-    edge_labels = nx.get_edge_attributes(G,'bound')        
-    nx.draw_networkx_edge_labels(G, pos,edge_labels)                       
+    edge_labels = nx.get_edge_attributes(G,'bound')
+    nx.draw_networkx_edge_labels(G, pos,edge_labels)
 
 
     if ax==None:
-        plt.show()   
+        plt.show()
 
 
 
 class Spectrum:
     ## from Domon & Costello
-    cid={"A":1,"X":1,"B":-1,"C":1,"Y":1,"Z":-1}     
-    default={"B":0,"C":0,"A":0,"X":0,"Y":0,"Z":0}    
-    
+    cid={"A":1,"X":1,"B":-1,"C":1,"Y":1,"Z":-1}
+    default={"B":0,"C":0,"A":0,"X":0,"Y":0,"Z":0}
+
     def __init__(self,Gatom,Gose,start,dicoMass=None):
         glabels=Gose.copy()
         self.gmass=Gatom.copy()
-        
-        self.randomint={"[A,X]":[3000.0, 10000.0],"[B,C,Y,Z]":[10.0, 4000.0]}        
-        
-        
+
+        self.randomint={"[A,X]":[3000.0, 10000.0],"[B,C,Y,Z]":[10.0, 4000.0]}
+
+
         if dicoMass!=None:
             for n,m in dicoMass.items():
                 Mass.dicomass[n]=m
@@ -62,8 +62,8 @@ class Spectrum:
         else:
             Mass.dicomass=Atom.dicomass.copy()
             Mass.valence=Atom.dicovalence.copy()
-        fragment=Mass( self.gmass,glabels,start)   
-        
+        fragment=Mass( self.gmass,glabels,start)
+
         self.ions=[]
         fragment.fragose(self.ions)
         fragment.fraglink(self.ions)
@@ -73,30 +73,30 @@ class Spectrum:
         #Logger.debug("neutral mass of entire molecule %.2f"%fragment.precurmass())
         print("neutral mass of entire molecule %.2f"%fragment.precurmass())
         nx.draw(glabels)
-        
-         
-     
+
+
+
     def quick_sort_ions(self,arr):
         """ Quicksort a list of ions
-        
+
         :type arr: list of ions (each is a dictionary)
         :param arr: List to sort
         :returns: list -- Sorted list
         """
         if not arr:
             return []
-    
+
         return self.quick_sort_ions([x for x in arr if x["mz"] < arr[0]["mz"]]) \
             + [x for x in arr if x["mz"] == arr[0]["mz"]] \
-            + self.quick_sort_ions([x for x in arr if x["mz"] > arr[0]["mz"]])       
-                
+            + self.quick_sort_ions([x for x in arr if x["mz"] > arr[0]["mz"]])
+
     @staticmethod
     def __adduct__(add,dctions):
         ions=[]
         sign=re.sub("[^+-]","",add)
         atom=re.sub("[+-]","",add)
-        
-        if atom in Atom.dicocharge.keys():            
+
+        if atom in Atom.dicocharge.keys():
             mass=Atom.mass(atom)
             if sign=="-":
                 mass*=-1
@@ -105,41 +105,41 @@ class Spectrum:
                     ion=item.copy()
                 else:
                     ion={}
-                    
+
                     elts=item.split(Mass.field_sep)
                     if len(elts)==3:
                         ion["mz"]=float(elts[0])
                         ion["intensity"]=float(elts[1])
-                        ion["name"]=elts[2]                
-                
-                ion["mz"]+=mass                
+                        ion["name"]=elts[2]
+
+                ion["mz"]+=mass
                 if isinstance(item,dict):
                     ions.append(ion)
                 else:
-                    ions.append("%f%s%f%s%s"%(ion["mz"],Mass.field_sep,ion["intensity"],Mass.field_sep,ion["name"]))                
+                    ions.append("%f%s%f%s%s"%(ion["mz"],Mass.field_sep,ion["intensity"],Mass.field_sep,ion["name"]))
         return ions
-        
-    
-         
-    
+
+
+
+
     def __dicomode__(dicomode,dicoion,atomcharge):
         """
         """
         ions=[]
-        
-        for item in dicoion:  
+
+        for item in dicoion:
             ion={}
             if isinstance(item,dict):
                 ion=item.copy()
             else:
                 ion={}
-                
+
                 elts=item.split(Mass.field_sep)
                 if len(elts)==3:
                     ion["mz"]=float(elts[0])
                     ion["intensity"]=float(elts[1])
                     ion["name"]=elts[2]
-                
+
             if re.search("^C",ion["name"]):
                 ion["mz"]+=dicomode["C"]*Atom.dicomass[atomcharge]
             elif re.search("^B",ion["name"]):
@@ -147,23 +147,23 @@ class Spectrum:
             elif re.search("^Z",ion["name"]):
                 ion["mz"]+=dicomode["Z"]*Atom.dicomass[atomcharge]
             elif re.search("^Y",ion["name"]):
-                ion["mz"]+=dicomode["Y"]*Atom.dicomass[atomcharge]                                   
-                
+                ion["mz"]+=dicomode["Y"]*Atom.dicomass[atomcharge]
+
             elif re.search("}A_{",ion["name"]):
                 ion["mz"]+=dicomode["A"]*Atom.dicomass[atomcharge]
-               
+
             elif re.search("}X_{",ion["name"]):
                 ion["mz"]+=dicomode["X"]*Atom.dicomass[atomcharge]
-               
-            
+
+
             if isinstance(item,dict):
                 ions.append(ion)
             else:
                 ions.append("%f%s%f%s%s"%(ion["mz"],Mass.field_sep,ion["intensity"],Mass.field_sep,ion["name"]))
-            
-    
+
+
         return ions
-    
+
     #randomize intensities by default
     def get_ions(self):
         """
@@ -173,40 +173,40 @@ class Spectrum:
         for ion in self.ions:
             for regexpion,minmax in self.randomint.items():
                 if re.search(regexpion,ion["name"])!=None:
-                    intensite=random.uniform(minmax[0], minmax[1]) 
+                    intensite=random.uniform(minmax[0], minmax[1])
             if intensite>0:
                 lsions.append("%0.6f;%0.3f;%s"%(ion["mz"],intensite,ion["name"]))
-                
+
         return lsions
-    
+
     def get_peaks(self,intensity_rule,isrange):
         """
         """
         lsions=[]
-        intensite=0       
-        
-        
+        intensite=0
+
+
         for ion in self.ions:
             for regexpion,irule in intensity_rule.items():
                 if re.search(regexpion,ion["name"])!=None:
                     if isrange:
-                        intensite=random.uniform(irule[0], irule[1]) 
+                        intensite=random.uniform(irule[0], irule[1])
                     else:
                         intensite=irule
-                       
-                        
-            if intensite>0:  
-                lsions.append("%0.6f;%0.3f;%s"%(ion["mz"],intensite,ion["name"]))            
+
+
+            if intensite>0:
+                lsions.append("%0.6f;%0.3f;%s"%(ion["mz"],intensite,ion["name"]))
 
 
         return lsions
-    
+
     def print(self):
         """
         """
-        for i in self.lsions:            
+        for i in self.lsions:
             Logger.debug(i)
-     
+
     def getseparator(self):
         """
         """
@@ -221,8 +221,8 @@ class Spectrum:
             else:
                 regexpion="^\\^{%i,%i}%s"%(cfrom,cto,typion)
                 self.randomint[regexpion]=[mini,maxi]
-    
-            
+
+
     def ratio_intensity(self,dicoratio,maxi=100.0):
         """
         """
@@ -234,37 +234,37 @@ class Spectrum:
                     intensite*=ratio
             if intensite>0:
                 lsions.append("%0.3f;%0.3f;%s"%(ion["mz"],intensite,ion["name"]))
-                
-        return lsions        
-   
 
-class Mass:    
-    
+        return lsions
+
+
+class Mass:
+
     """
      Mass: partitions atom graph and computes masses from subgraphs
     """
-    
+
     dicomass={}
     valence={}
-   
-        
+
+
     field_sep=';'
-    
+
     def __init__(self,graphatom,graphose,reducing_end=None):
         self.Gatom=graphatom
-        desoxynodes=[]   
-        
+        desoxynodes=[]
+
         for n in self.Gatom.nodes():
             if self.Gatom.nodes[n]["atom"]=="":
                 desoxynodes.append(n)
         for n in desoxynodes:
-            self.Gatom.remove_node(n)       
-        
-        
+            self.Gatom.remove_node(n)
+
+
         self.Gose=graphose
         self.dicoanhydro={}
         self.cyclatoms=self.__cycles__()
-        self.greek=945        
+        self.greek=945
         self.diconame={}
         self.re_osenum={}
         self.nre_osenum={}
@@ -273,16 +273,16 @@ class Mass:
             self.set_redend(reducing_end)
         else:
             self.get_firstose()
-            
-    
-       
+
+
+
     def get_firstose(self):
         """
         used when ose graph has not reducing_end attribute (get 1st ancestor of tree graph)
         """
         if nx.is_tree(self.Gose):
-            [self.set_redend(n) for n,d in self.Gose.in_degree() if d==0] 
-    
+            [self.set_redend(n) for n,d in self.Gose.in_degree() if d==0]
+
     def __getObound__(self):
         """
         """
@@ -291,23 +291,23 @@ class Mass:
             descr=self.Gatom.nodes[n]
             if descr['atom']=='O':
                 neigh=list(self.Gatom[n])
-                if len(neigh)==2:                    
+                if len(neigh)==2:
                     descr1=self.Gatom.nodes[neigh[0]]
                     descr2=self.Gatom.nodes[neigh[1]]
                     if descr1['ose']!=descr2['ose']:
-                        ls.append(n) 
+                        ls.append(n)
                         edge=(descr1['ose'],descr2['ose'])
                         if edge in self.Gose.edges():
-                            self.Gose.edges[edge]["o"]=n   
+                            self.Gose.edges[edge]["o"]=n
                         else:
                             edge=(descr2['ose'],descr1['ose'])
                             try:
-                                self.Gose.edges[edge]["o"]=n   
+                                self.Gose.edges[edge]["o"]=n
                             except:
                                 Logger.debug("problem MS/MS : unable to find osidic binding")
-                                
+
         return ls
-    
+
     def __cycles__(self):
         """
         """
@@ -315,16 +315,16 @@ class Mass:
         self.dicoanhydro={}
         cyclodico={}
         for edge in self.Gatom.edges():
-            if "link" in self.Gatom.edges[edge]:                
+            if "link" in self.Gatom.edges[edge]:
                 if self.Gatom.edges[edge]["link"]=="anhydro":
                     anhy_edges.append(edge)
-                
-        cycle_nodes= nx.cycle_basis(self.Gatom, 1)      
-        
-        
-        
+
+        cycle_nodes= nx.cycle_basis(self.Gatom, 1)
+
+
+
         for i in range(0,len(cycle_nodes)-1):
-            for j in range(i+1,len(cycle_nodes)):                
+            for j in range(i+1,len(cycle_nodes)):
                 s1=set(cycle_nodes[i])
                 s2=set(cycle_nodes[j])
                 inter=list(s1.intersection(s2))
@@ -333,47 +333,47 @@ class Mass:
                         self.dicoanhydro[self.Gatom.nodes[inter[0]]["ose"]]=cycle_nodes[i]
                     else:
                         self.dicoanhydro[self.Gatom.nodes[inter[0]]["ose"]]=cycle_nodes[j]
-                        
-       
+
+
         if len(self.dicoanhydro.keys())>0:
             if len(anhy_edges)>0:
                 G=self.Gatom.copy()
                 for e in anhy_edges:
                     G.remove_edge(*e)
-                cycle_nodes= nx.cycle_basis(G, 1)  
+                cycle_nodes= nx.cycle_basis(G, 1)
             else:
                 Logger.debug("Error anhydro links are missing in edge attribute")
-                
+
         for o in self.Gose.nodes():
             cyclodico[o]=[]
             for cycle in cycle_nodes:
                 for n in cycle:
                     descr=self.Gatom.nodes[n]
                     if descr['ose']==o:
-                        cyclodico[o].append(n) 
+                        cyclodico[o].append(n)
                     if descr['atom']=='O':
                         # for intra-cyclic ion labels
-                        self.Gatom.nodes[n]['cnum']=0 
-                        
+                        self.Gatom.nodes[n]['cnum']=0
+
         return cyclodico
-    
+
     def set_redend(self,reducing_end) :
         """
-        """        
+        """
         self.r=reducing_end
-        self.assign_branch(reducing_end,'') 
+        self.assign_branch(reducing_end,'')
         self.__assign_osenum__(reducing_end,1)
         self.__parse_nrepath__()
-    
+
     # branch naming from ose start
     def assign_branch(self,start,name):
         """
         branch naming from ose start
         """
-        desc=self.tri(self.Gose[start])        
+        desc=self.tri(self.Gose[start])
         d=len(desc)
         self.diconame[start]=name
-        
+
         if d>0:
             if d==1:
                 self.assign_branch(desc[0],name)
@@ -381,17 +381,17 @@ class Mass:
                 # alpha beta gamma...
                 if name=="":
                     for i in range(0,len(desc)):
-                        name=chr(self.greek+i)      
+                        name=chr(self.greek+i)
                         self.assign_branch(desc[i],name)
-                        
+
                 # ' '' '''...
                 else:
                     for i in range(0,len(desc)):
-                        name+="'"                        
-                        self.assign_branch(desc[i],name)                                    
-                
-       
-    
+                        name+="'"
+                        self.assign_branch(desc[i],name)
+
+
+
     def get_nbdesc(self,ose,num):
         """
         """
@@ -399,17 +399,17 @@ class Mass:
             if n!=ose:
                 self.get_nbdesc(n,num+1)
         return num
-    
+
     def get_weight(self,ose,w):
         """
         """
-        
+
         for n in self.Gose[ose]:
             if n!=ose:
                 w=self.get_weight(n,w)+self.get_omass(ose)
-        return w        
-    
-    
+        return w
+
+
     def tri(self,lso):
         """
         branch naming according the number of descendants {nbdesc:[oses]} (should be the computed masses)
@@ -419,7 +419,7 @@ class Mass:
         for n in lso:
             #k=self.get_nbdesc(n,0)
             k=self.get_weight(n,0)
-            if k in lsd.keys():            
+            if k in lsd.keys():
                 lsd[k].append(n)
             else:
                 lsd[k]=[n]
@@ -429,16 +429,16 @@ class Mass:
             for elt in lsd[i]:
                 lstrie.append(elt)
         return lstrie
-    
+
     def get_omass(self,ose):
         """
-        """        
-        ls=self.get_oseatoms_degree(ose,0,0)  
+        """
+        ls=self.get_oseatoms_degree(ose,0,0)
         m=self.compute_mass(ls)
         m=1
         return m
 
-    
+
 
     def compute_mass(self,lsatom_bond):
         """
@@ -448,33 +448,33 @@ class Mass:
             atom=re.sub("[0-9]","",ab[0])
             links=ab[1]
             if atom.find("=")!=-1:
-                atom=re.sub("=","",atom)                
+                atom=re.sub("=","",atom)
                 m-=self.dicomass["H"]*2
-               
+
             nh=self.valence[atom]-links
-            
+
             if nh<0:
-                Logger.debug("valence probleme! "+ atom+" "+str(links),1)
+                Logger.debug("valence problem! "+ atom+" "+str(links),1)
             else:
                 m+=self.dicomass[atom]+self.dicomass['H']*nh
         return m
-        
+
     def __assign_osenum__(self,node,num):
         """
         """
         self.re_osenum[node]=num
-        num+=1                 
+        num+=1
         desc=self.Gose[node]
         if len(desc)>0:
             for n in desc:
                 self.__assign_osenum__(n,num)
-    
-    
-    
+
+
+
     def __parse_nrepath__(self):
         """
         numeroter les oses en partant des extremites (non-reducing ends)
-        pour les troncs communs, numerote à partir de la + longue branche        
+        pour les troncs communs, numerote à partir de la + longue branche
         """
         ions={}
         paths=[]
@@ -484,127 +484,127 @@ class Mass:
             if len(g[i])==0:
                 paths.append(nx.shortest_path(g,source=self.r,target=i))
         if len(paths)>1:
-            upath=unique_path(paths)            
+            upath=unique_path(paths)
         else:
             upath=[paths[0]]
-        
-        for p in upath:             
+
+        for p in upath:
             p.reverse()
-            self.__assign_nre_osenum(p,0)    
-    
-    def __assign_nre_osenum(self,path,num):                 
+            self.__assign_nre_osenum(p,0)
+
+    def __assign_nre_osenum(self,path,num):
         """
         """
         if num<len(path):
-            node=path[num]            
+            node=path[num]
             self.nre_osenum[node]=num+1
-            num+=1                
-            self.__assign_nre_osenum(path,num)        
-    
+            num+=1
+            self.__assign_nre_osenum(path,num)
+
     def fragzero(self,outlist):
         zlab="Z_{0}"
         ylab="Y_{0}"
-        
+
         blab="B_{"+str(self.nre_osenum[self.r])+self.diconame[self.r]+"}"
-        clab="C_{"+str(self.nre_osenum[self.r])+self.diconame[self.r]+"}"        
-        
+        clab="C_{"+str(self.nre_osenum[self.r])+self.diconame[self.r]+"}"
+
         c1node=None
         for n in self.Gatom.nodes():
             if self.Gatom.nodes[n]["ose"]==self.r and self.Gatom.nodes[n]["atom"]=="C" and self.Gatom.nodes[n]["cnum"]==1 and not self.Gatom.nodes[n]["substit"]:
                 c1node=n
                 break
-         
+
         neigh=list(self.Gatom[c1node])
         right=[]
         for n in neigh:
-            if self.Gatom.nodes[n]["substit"] and self.Gatom.nodes[n]["atom"]=="O":                
+            if self.Gatom.nodes[n]["substit"] and self.Gatom.nodes[n]["atom"]=="O":
                 right.append(n)
-                            
-        if len(right)==1:                 
+
+        if len(right)==1:
             morceaux=self.partitionne([(c1node,right[0])])
             node_left=morceaux[c1node]
-            node_right=morceaux[right[0]]     
-            if len(node_right)>1:    
+            node_right=morceaux[right[0]]
+            if len(node_right)>1:
                 mleft=self.__calcmass__(node_left)
-                mright=self.__calcmass__(node_right)  
-                
+                mright=self.__calcmass__(node_right)
+
                 outlist.append({"mz":mleft+self.dicomass["O"],"name":clab})
-                outlist.append({"mz":mleft,"name":blab})                          
-                
+                outlist.append({"mz":mleft,"name":blab})
+
                 outlist.append({"mz":mright-self.dicomass["O"],"name":zlab})
-                outlist.append({"mz":mright,"name":ylab})                  
-    
+                outlist.append({"mz":mright,"name":ylab})
+
     def fraglink(self,outlist):
         """
-        """        
+        """
         if self.r!=None:
             for l in self.lsObound:
-            
+
                 edges=[]
                 [edges.append(i) for i in self.Gatom[l]]
-                
-                if len(edges)==2:                                
+
+                if len(edges)==2:
                     ose0=self.Gatom.nodes[edges[0]]['ose']
                     ose1=self.Gatom.nodes[edges[1]]['ose']
                     atom0=self.Gatom.nodes[edges[0]]['atom']
                     atom1=self.Gatom.nodes[edges[1]]['atom']
                     left=l
                     right=edges[0]
-                    ## quel sens???                
-                    if (ose0,ose1) in self.Gose.edges():                    
+                    ## quel sens???
+                    if (ose0,ose1) in self.Gose.edges():
                         zlab="Z_{"+str(self.re_osenum[ose0])+self.diconame[ose1]+"}"
                         ylab="Y_{"+str(self.re_osenum[ose0])+self.diconame[ose1]+"}"
-                        
+
                         blab="B_{"+str(self.nre_osenum[ose1])+self.diconame[ose1]+"}"
                         clab="C_{"+str(self.nre_osenum[ose1])+self.diconame[ose1]+"}"
-                        
-                        right=edges[0]                    
-                        
-                    else:                    
+
+                        right=edges[0]
+
+                    else:
                         zlab="Z_{"+str(self.re_osenum[ose1])+self.diconame[ose0]+"}"
                         ylab="Y_{"+str(self.re_osenum[ose1])+self.diconame[ose0]+"}"
-                        blab="B_{"+str(self.nre_osenum[ose0])+self.diconame[ose0]+"}"                    
-                        clab="C_{"+str(self.nre_osenum[ose0])+self.diconame[ose0]+"}"                    
+                        blab="B_{"+str(self.nre_osenum[ose0])+self.diconame[ose0]+"}"
+                        clab="C_{"+str(self.nre_osenum[ose0])+self.diconame[ose0]+"}"
                         right=edges[1]
-                        
+
                     morceaux=self.partitionne([(left,right)])
                     node_left=morceaux[left]
-                    node_right=morceaux[right]                
-                                       
+                    node_right=morceaux[right]
+
                     mleft=self.__calcmass__(node_left)
-                    mright=self.__calcmass__(node_right)                 
-                    
-                    
-                    
+                    mright=self.__calcmass__(node_right)
+
+
+
                     outlist.append({"mz":mleft,"name":clab})
-                    outlist.append({"mz":mleft-self.dicomass["O"],"name":blab})                          
-                    
+                    outlist.append({"mz":mleft-self.dicomass["O"],"name":blab})
+
                     outlist.append({"mz":mright,"name":zlab})
-                    outlist.append({"mz":mright+self.dicomass["O"],"name":ylab})                        
-                else:                    
+                    outlist.append({"mz":mright+self.dicomass["O"],"name":ylab})
+                else:
                     Logger.debug('erreur nombre de connexions: %s'%(len(edges)),2)
-                
-        else:            
+
+        else:
             Logger.debug("erreur: pas d'extremité non réductrice désignée dans la structure",2)
-                    
-            
-            
+
+
+
     def fragose(self,outlist):
         """
         """
         if self.r!=None:
-            for o in self.Gose.nodes():                   
-                edges=[]   
+            for o in self.Gose.nodes():
+                edges=[]
                 for e in self.casse_cycle(self.cyclatoms[o]) :
                     if not self.protect_edge(e,o):
                         edges.append(e)
-                
+
                 branch=self.diconame[o]
                 nre=str(self.nre_osenum[o])
                 re=str(self.re_osenum[o]-1)
                 xion="X_{"+re+branch+"}"
                 aion="A_{"+nre+branch+"}"
-                
+
                 carbcycl=[]
                 for c in self.cyclatoms[o]:
                     if self.Gatom.nodes[c]['cnum']!=0:
@@ -615,81 +615,81 @@ class Mass:
                     ascendant=nx.shortest_path(self.Gose,self.r,o)
                     ascendant.reverse()
                     ascendant=ascendant[1]
-                
+
                     olink=self.Gose.edges[ascendant,o]["o"]
                     for n in self.Gatom[olink]:
                         if self.Gatom.nodes[n]['ose']==o:
-                            startc=n 
+                            startc=n
                 else:
                     for i in self.cyclatoms[o]:
                         if self.Gatom.nodes[i]['cnum']==1:
                             startc=i
                             break
-               
-                                
+
+
                 # calculer la masse des ions X et A (les ions X contiennent le startc)
-                for casse in edges:                    
-                    morceaux=self.partitionne(casse)   
+                for casse in edges:
+                    morceaux=self.partitionne(casse)
                     massx=0
                     massa=0
-                    for g in morceaux.keys():                        
+                    for g in morceaux.keys():
                         if startc in morceaux[g]:
                             massx=self.__calcmass__(morceaux[g])-Mass.dicomass["H"]
                         else:
                             massa=self.__calcmass__(morceaux[g])-Mass.dicomass["H"]
-                        
-                    
+
+
                     lblion=""
-                    edge=casse[0]  
+                    edge=casse[0]
                     edge=[self.Gatom.nodes[edge[0]]['cnum'],self.Gatom.nodes[edge[1]]['cnum']]
                     edge.sort()
-                    #ncc=len(self.cyclatoms[o])-1  
+                    #ncc=len(self.cyclatoms[o])-1
                     ncc=max(carbcycl)
                     startc=min(carbcycl)
-                    if edge!=[0,ncc]:                                                
-                        lab0=min(edge[0]-startc,edge[1]-startc)+startc                  
-                    else:                        
+                    if edge!=[0,ncc]:
+                        lab0=min(edge[0]-startc,edge[1]-startc)+startc
+                    else:
                         lab0=ncc
-                    
-                    edge=casse[1]                      
+
+                    edge=casse[1]
                     edge=[self.Gatom.nodes[edge[0]]['cnum'],self.Gatom.nodes[edge[1]]['cnum']]
-                    edge.sort()    
-                    
-                    
-                    if edge!=[0,ncc]:                        
-                        lab1=min(edge[0]-startc,edge[1]-startc)+startc 
+                    edge.sort()
+
+
+                    if edge!=[0,ncc]:
+                        lab1=min(edge[0]-startc,edge[1]-startc)+startc
                     else:
                         lab1=ncc
                     lblion=str(min(lab0,lab1))+","+str(max(lab0,lab1))
-                    
+
                     outlist.append({"mz":massx,"name":"^{%s}%s"%(lblion,xion)})
                     outlist.append({"mz":massa,"name":"^{%s}%s"%(lblion,aion)})
-        else:            
-            Logger.debug("erreur: pas d'extremité non réductrice désignée dans la structure",2)    
-        
-    
-        
+        else:
+            Logger.debug("erreur: pas d'extremité non réductrice désignée dans la structure",2)
+
+
+
     def precurmass(self):
         """
         """
         return self.__calcmass__(list(self.Gatom.nodes()))
-    
-    def __calcmass__(self,morceau):  
+
+    def __calcmass__(self,morceau):
         """
         """
         mass=0
         for n in morceau:
-            atom=re.sub("[0-9]","",self.Gatom.nodes[n]['atom'])                        
+            atom=re.sub("[0-9]","",self.Gatom.nodes[n]['atom'])
             if atom.find("=")!=-1:
-                atom=re.sub("=","",atom)                
-                mass-=self.dicomass["H"]*2            
+                atom=re.sub("=","",atom)
+                mass-=self.dicomass["H"]*2
             nh=self.valence[atom]-nx.degree(self.Gatom,n)
             if nh<0:
                 print("valence probleme! "+ atom+" "+str(nx.degree(self.Gatom,n)),1)
-            else:                        
-                mass+=self.dicomass[atom]+self.dicomass['H']*nh    
-        return mass   
-  
+            else:
+                mass+=self.dicomass[atom]+self.dicomass['H']*nh
+        return mass
+
     def protect_edge(self,edge,ose):
         if ose in self.dicoanhydro.keys():
             cyc=self.dicoanhydro[ose]
@@ -702,8 +702,8 @@ class Mass:
             else:
                 return False
         return False
-        
-   
+
+
     def casse_cycle(self,path):
         """
         """
@@ -713,40 +713,40 @@ class Mass:
         for i in range(0,ncc-1):
             for j in range(i+1,ncc):
                 points.append([i,j])
-        
+
         for p in points:
             edge1=(path[p[0]],path[p[0]+1])
             if p[1]==ncc-1:
                 edge2=(path[p[1]],path[0])
             else:
                 edge2=(path[p[1]],path[p[1]+1])
-        
+
             edges.append([edge1,edge2])
-        
+
         return edges
-                            
+
     def get_oseatoms_degree(self,iose,fromc,toc):
         """
         """
         result=[]
-        nodes=[] 
-        
+        nodes=[]
+
         for inode in self.Gatom.nodes():
             description=self.Gatom.nodes[inode]
-            if description["ose"]==iose:               
+            if description["ose"]==iose:
                 if fromc==toc:
                     nodes.append(inode)
                 else:
                     if description["cnum"] in range(fromc,toc+1):
                         nodes.append(inode)
-        
-        for n in nodes:    
+
+        for n in nodes:
             binome=(self.Gatom.nodes[n]['atom'],nx.degree(self.Gatom,n))
             result.append(binome)
         return result
-    
-    
-    
+
+
+
     def partitionne(self,edges):
         """
         """
@@ -754,61 +754,61 @@ class Mass:
         Gprime=nx.Graph()
         Gprime.add_nodes_from(self.Gatom.nodes())
         Gprime.add_edges_from(self.Gatom.edges())
-        
-        Gprime.remove_edges_from(edges)        
-        
-        
-        for e in edges:            
+
+        Gprime.remove_edges_from(edges)
+
+
+        for e in edges:
             deb=e[0]
-            fin=e[1] 
-                        
+            fin=e[1]
+
             result[deb]=self.__subgroup__(Gprime,deb)
             result[fin]=self.__subgroup__(Gprime,fin)
-                 
-            
-        return result    
-    
+
+
+        return result
+
     def __subgroup__(self,G,start):
         """
         """
         group=[start]
         self.__collect4__(G,start,start,group)
-        return group 
-    
-    def __collect4__(self,G,start,node,ls):         
+        return group
+
+    def __collect4__(self,G,start,node,ls):
         """
         """
-        for n in G[node]:                
-            if n !=start and n not in ls:                          
+        for n in G[node]:
+            if n !=start and n not in ls:
                 ls.append(n)
                 self.__collect4__(G,node,n,ls)
-        return ls         
-  
-    
-    
-def tri_path(paths,pref,tri):          
+        return ls
+
+
+
+def tri_path(paths,pref,tri):
     """
     internal function of the module
     """
     tri.append(pref)
     paths.remove(pref)
-    
+
     for ip in range(0,len(paths)):
-        paths[ip]=diff(paths[ip],pref)  
-        
-    if len(paths)>1:        
+        paths[ip]=diff(paths[ip],pref)
+
+    if len(paths)>1:
         tri_path(paths,paths[longest(paths)],tri)
     else:
         #tri.append(paths[0])
         if len(paths)>0:
             tri.append(paths[0])
-            
+
 def diff(t1,t2):
     result=[]
     for i in t1:
         if i not in t2:
             result.append(i)
-    
+
     return result
 
 def longest(paths):
