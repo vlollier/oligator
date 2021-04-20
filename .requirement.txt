@@ -1,7 +1,7 @@
-matplotlib==3.0.3
-networkx==2.2
-numpy==1.16.2
-pandas==0.24.2
-PyQt5==5.12.2
-PyQt5-sip==4.19.17
-pyqtdeploy==2.4
+matplotlib>=3.0.3,<=3.4.1
+decorator>=4.0.11,<=4.4.2
+networkx>=2.2,<=2.5
+numpy>=1.16.2,<=1.20.2
+pandas>=0.24.2,<=1.2.3
+PyQt5>=5.12.2,<=5.15.2
+PyQt5-sip>=4.19.17,<=12.8.1
