@@ -506,7 +506,7 @@ class Window( QMainWindow ):
         if len(SingletonTopo.OSE_LIST)>0 and len(SingletonTopo.C1FREE)==1:  
             fileName = QFileDialog.getSaveFileName(self, 'Export theoretical MS/MS', "", "All Files (*);;Text Files (*.txt)")
         
-            print(SubstitutionLibrary.get_non_smiles())
+            #print(SubstitutionLibrary.get_non_smiles())
             TopoControler.updateGraph()
             conversion=SmilesEncoder(TopoControler.TopoG.Gatom)                            
             smi=conversion.graph2smi()            
@@ -721,8 +721,8 @@ class TopoControler:
             anhydro=dial.chkAnhydro.isChecked()
         
         if len(out)>0 :            
-            print("ose has changed")            
-            print(out)
+            #print("ose has changed")            
+            #print(out)
             nbcarbs=len(out)
             startcycle=0
             endcycle=nbcarbs
@@ -827,7 +827,8 @@ class TopoControler:
             om1=SingletonTopo.OSE_LIST[bond.parent_ose]
             om2=SingletonTopo.OSE_LIST[bond.child_ose]
             line=img1.getline(bond.parent_carbon)
-            print("selection %i-%i binding, %s"%(bond.parent_ose,bond.child_ose,bond.getAttributString()))
+            Logger.debug("selection %i-%i binding, %s"%(bond.parent_ose,bond.child_ose,bond.getAttributString()),0)
+            #print("selection %i-%i binding, %s"%(bond.parent_ose,bond.child_ose,bond.getAttributString()))
             if line!=None:
                 free=[bond.parent_carbon]
                 for icarb in range(0,om1.nct):            
@@ -965,7 +966,8 @@ class TopoControler:
                             self.lsoseimg[ob.child_ose].remove_connexion(line[0])
                             
                         else:
-                            print("pas normal ça")                        
+                            Logger.debug("pas normal ça",2)
+                            #print("pas normal ça")                        
                         SingletonTopo.deledge(ob)
     
     def get_nearest_carbon(self,img1,img2):
@@ -1062,7 +1064,8 @@ class TopoControler:
                             left.add_connexion(line,carbleft,2)
                             line.signal.itemDoubleClicked.connect(lambda:self.dialedge(line.signal.value)) 
                         else:
-                            print("%i has already a parent ose"%left.identifier)
+                            Logger.debug("%i has already a parent ose"%left.identifier,0)
+                            #print("%i has already a parent ose"%left.identifier)
                             errdial=QMessageBox()
                             errdial.setIcon(QMessageBox.Critical)
                             errdial.setText("Direction error")
@@ -1070,7 +1073,8 @@ class TopoControler:
                             errdial.setDetailedText("Direction from reducing end inconsistent.")                    
                             errdial.exec_()                          
                     else:
-                        print("binding impossible")
+                        #print("binding impossible")
+                        Logger.debug("binding impossible",0)
 
     def unbind_ose(self,oimage): 
         """

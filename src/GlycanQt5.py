@@ -972,7 +972,7 @@ class SubstituantView(QWidget):
             if int(rowdata["identifier"])>=len(self.tableView.data):
                 for iline in range(0,len(self.addSubstitution)):                    
                     line=self.addSubstitution[iline]
-                    print((line["identifier"],rowdata["identifier"]))
+                    #print((line["identifier"],rowdata["identifier"]))
                     if line["identifier"]==rowdata["identifier"]:
                         self.addSubstitution.remove(line)
             
@@ -1791,7 +1791,7 @@ class DialogMS(QDialog):
             self.ratio["Y"]=self.sliderY.value()*maxi/100
             self.ratio["C"]=self.sliderC.value()*maxi/100
             self.ratio["Z"]=self.sliderZ.value()*maxi/100    
-            print(self.ratio)        
+            #print(self.ratio)        
         self.plotData()
         
     
@@ -2194,21 +2194,21 @@ class SignalObject(QObject):
         """
         """
         SignalObject.value=i
-        print("------------------------------")
-        print(i)
+        #print("------------------------------")
+        #print(i)
         
         self.itemDoubleClicked.emit()
-        print("------------------------------")
+        #print("------------------------------")
         
     def right_click(self,i):
         """
         """
         SignalObject.value=i
-        print("--right click-----------------")
-        print(i)
+        #print("--right click-----------------")
+        #print(i)
         
         self.itemContextMenu.emit()
-        print("------------------------------")
+        #print("------------------------------")
     
     
     def suppr_press(self):

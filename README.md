@@ -16,8 +16,9 @@ git clone https://github.com/vlollier/oligator oligator
 
 Linux
 ```
+cd oligator
 chmod u+x start.sh 
-start.sh
+./start.sh
 ```
 
 Windows

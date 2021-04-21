@@ -150,7 +150,7 @@ class SingletonTopo:
                      conflict.append([i,j])
       if len(conflict)>0:         
          for collision in conflict:
-            print(("collision imgs:",collision))
+            #print(("collision imgs:",collision))
             group1=[]
             group2=[]
       
@@ -221,7 +221,8 @@ class SingletonTopo:
       """      
       bonds=[]
       if bond:
-         print(bond.getAttributString())
+         Logger.debug(bond.getAttributString(),0)
+         #print(bond.getAttributString())
       if grid==None:
          grid={}         
          start=SingletonTopo.C1FREE[0]         

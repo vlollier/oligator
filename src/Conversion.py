@@ -1579,12 +1579,12 @@ class SmilesDecoder:
                 cnum=gprime.nodes[node]["cnum"]
                 
                 if ot.get_iso(cnum) in ["D","L"] and not gprime.nodes[node]["substit"]:                    
-                    print(ot.get_iso(cnum))
+                    #print(ot.get_iso(cnum))
                          # =================ISOMER THING ================
                     if not self.checkisomer(node,gprime):
                         ot.inverse_iso(cnum)
                         self.Gatom.nodes[node]["isomer"]=ot.get_iso(cnum)
-                        print("iso changed for node %i , cnum %i "%(node,cnum))
+                        #print("iso changed for node %i , cnum %i "%(node,cnum))
                          # ===========================================
                     
                         
@@ -2278,7 +2278,7 @@ class WurcsEncoder:
                             w+="h"
                         elif ot.get_mod(cnum)=="":
                             w+="m"
-                            print("smkfdh"+str(ot.get_mod(cnum)))
+                            #print("smkfdh"+str(ot.get_mod(cnum)))
                         else:
                             w+="h"
                     else:
@@ -2385,8 +2385,8 @@ class WurcsEncoder:
             path.append(waiting[0])
             self.parse_topo(waiting[0],path,waiting[1:])
         else:            
-            print(("path",path))
-    
+            #print(("path",path))
+            Logger.debug(str(("path",path)),1)
     
     def parseatoms(self,nodes,exclu):
         """
@@ -2772,11 +2772,11 @@ class ose_template:
                         minpath=path
                 link=list(set(minpath) - set(sub))
                 link=list(set(link) - set(ose))
-                print(link)
+                #print(link)
                 for i in range(0,len(minpath)-1):  
                     if minpath[i] in sub and minpath[i+1] in link:                          
                         e=(minpath[i],minpath[i+1])
-                        print(e)
+                        #print(e)
                         gprime.remove_edge(*e)
                                            
                         toremove=__collect4__(gprime,minpath[i],minpath[i],[minpath[i]])
@@ -3430,7 +3430,7 @@ class Topograph:
                        
                     
                             
-                    print((osenum,cnum,subformul))        
+                    #print((osenum,cnum,subformul))        
                     ref=SubstitutionLibrary.get_substitution(subformul)
     
                     
@@ -3458,7 +3458,7 @@ class Topograph:
     
                         dico_modif[osenum+start_osecount].append((cnum,newsub.identifier))
                         
-                        print(dico_modif[osenum+start_osecount])
+                        #print(dico_modif[osenum+start_osecount])
     
                         
     
@@ -3756,7 +3756,7 @@ class Composition:
         """
         
         """
-        print(atomlink)
+        #print(atomlink)
         nodename=""
         if len(self.Gatom.nodes())>0:
             if atomlink=="":
@@ -3813,7 +3813,7 @@ class Composition:
         self.Gatom.nodes[node1]["nh"]-=1
         self.Gatom.nodes[node2]["nh"]-=1
         self.Gatom.add_edge(node1,node2)   
-        print((node1,node2))
+        #print((node1,node2))
     
     def connectLight(self,n=None):
         """
