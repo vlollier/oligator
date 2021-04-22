@@ -948,19 +948,24 @@ class SubstituantView(QWidget):
         """        
         indexesSelection = self.tableView.selectedIndexes()
         row = self.tableView.currentRow()
-        name=self.tableView.item(row,0).text()
+        
         if len(indexesSelection)==0 :
             self.modifButton.setEnabled(False)
             self.supprButton.setEnabled(False)
         else :
-            if re.match("^desoxy$",name,re.IGNORECASE) or re.match("^hydroxy$",name,re.IGNORECASE):
+            if self.tableView.item(row,0):
+                name=self.tableView.item(row,0).text()            
+                if re.match("^desoxy$",name,re.IGNORECASE) or re.match("^hydroxy$",name,re.IGNORECASE):
+                    self.modifButton.setEnabled(False)
+                    self.supprButton.setEnabled(False)
+                    
+                else:
+                    self.modifButton.setEnabled(True)
+                    self.supprButton.setEnabled(True)       
+            else:                
                 self.modifButton.setEnabled(False)
-                self.supprButton.setEnabled(False)
+                self.supprButton.setEnabled(False)        
                 
-            else:
-                self.modifButton.setEnabled(True)
-                self.supprButton.setEnabled(True)       
-
     def dialog (self, button):
         """
         """

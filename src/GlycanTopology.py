@@ -316,7 +316,7 @@ class OseModel:
       
    def get_carbmod(self,idsub):
       carbs=[]
-      for icarb in range(len(self.modifs)):
+      for icarb in range(len(self.modifs[1])):
          if self.modifs[1][icarb]==idsub:
             carbs.append(icarb+1)
       return carbs
